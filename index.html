@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+    <title> My Chat </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <style>
+        #login-error-div > .alert {
+            padding: 2px 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+        <div class="row">
+            <div class="col-md-9" id="chat"></div>
+            <div class="col-md-3" id="userListDiv"></div>
+            <div class="col-md-12">
+                <form id="message-form">
+                    <input type="text" name="msg" id="msg">
+                    <button>Send Message</button>
+                </form>
+            </div>
+        </div>
+
+    <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" id="new-user-modal">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title"> Bienvenid@ </h4>
+                </div>
+                <div class="modal-body">
+                    <div id="login-error-div"></div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <i class="fa fa-power-off fa-3x"></i>
+                        </div>
+                        <div class="col-md-9">
+                            <form id="login-form">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="nickname" id="new-nick-name" name="new-nick-name">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button"><i class="fa fa-handshake-o"></i></button>
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                    </div> <!-- ./row -->
+                </div> <!-- ./modal-body -->
+            </div> <!-- ./modal-content -->
+        </div> <!-- ./modal-dialog -->
+    </div> <!-- ./modal -->
+
+</div> <!-- ./container.fluid -->
+    
+<script
+src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    $(function(){
+        var socket = io.connect(),
+            $loginDiv = $('#login-div'),
+            $chatDiv = $('#chat-div'),
+            $errorsDiv = $('#login-error-div'),
+            $usersList = $('#userListDiv'),
+            $form = $('#message-form'),
+            $loginForm = $('#login-form'),
+            $box = $('#msg'),
+            $user = $('#user-name'),
+            $newUserName = $('#new-nick-name'),
+            $chat = $('#chat');
+
+        $('#new-user-modal').modal();
+
+        $loginForm.find('button').on('click', function(){
+            $loginForm.submit();
+        })
+        
+        $loginForm.on('submit', function(e){
+            e.preventDefault();
+            $errorsDiv.html('');
+            socket.emit('new_user',{nickName:$newUserName.val()},function(res){
+                if (res.isValid) {
+                    $('#new-user-modal').modal('toggle');
+                    $usersList.html('<ul>');
+                    $.map(res.users, function(i,l){
+                        $usersList.append('<li>'+i+'</li>');
+                    });
+                    $usersList.append('<ul>');
+                } else {
+                    $errorsDiv.append('<div class="alert alert-danger" role="alert">Nickname is already in use</div>');
+                }
+            });
+        });
+
+        $form.submit(function(e){
+            e.preventDefault();
+            socket.emit('send message',{msg:$box.val(), user:$user.val()});
+            $box.val('');
+        });
+
+        socket.on('new message',function(data){
+            $chat.append('<b>'+data.user+':</b> '+data.msg+'<br />');
+        });
+
+        socket.on('new_user',function(data){
+            $usersList.html('<ul>');
+            $.map(res.users, function(i,l){
+                $usersList.append('<li>'+i+'</li>');
+            });
+            $usersList.append('<ul>');
+        });
+    })
+</script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</body>
+</html>
