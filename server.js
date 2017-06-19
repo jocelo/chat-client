@@ -26,7 +26,7 @@ io.sockets.on('connection',function(socket){
         }
     });
 
-    socket.on('send message',function(data){
-        io.sockets.emit('new message',{msg:data.msg, user:data.user});
+    socket.on('send_message',function(data){
+        io.sockets.emit('send_message',{msg:data.msg, user:data.user});
     });
 });
