@@ -69,6 +69,14 @@
             margin-left: 10px;
             overflow-x: auto;
         }
+
+        .mr-2 {
+            margin-right: 0.2em;
+        }
+
+        i.fa {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -85,7 +93,7 @@
         </div>
         <form id="message-form">
             <div class="message-div">
-                <input type="text" name="msg" id="msg"><button>Go</button> </div>
+                <i class="fa fa-smile-o fa-2x mr-2"></i><input type="text" name="msg" id="msg" placeholder="Message"> </div>
             </div>
         </form>
     </div> <!-- ./viewport -->
@@ -130,7 +138,7 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
             $loginDiv = $('#login-div'),
             $chatDiv = $('#chat-div'),
             $errorsDiv = $('#login-error-div'),
-            $usersList = $('#userListDiv'),
+            $usersList = $('#users-box'),
             $form = $('#message-form'),
             $loginForm = $('#login-form'),
             $box = $('#msg'),
@@ -173,6 +181,12 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
 
         socket.on('send_message',function(data){
             $chat.append('<b>'+data.user+':</b> '+data.msg+'<br />');
+        });
+
+        socket.on('nicknames', function(data){
+            var names = data.join('</li><li>');
+
+            $usersList.html('<ul><li>'+names+'</li></ul>');
         });
 
         socket.on('new_user',function(data){
