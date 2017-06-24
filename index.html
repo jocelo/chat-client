@@ -4,80 +4,8 @@
     <title> My Chat </title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-    <style>
-        html, body, .viewport {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-        }
-        .viewport {
-            display: flex;
-            flex-direction:column;
-        }
-        .horizontal-box {
-            display:flex;
-            flex-direction:row;
-            justify-content: space-between;
-            flex:1;
-        }
-
-        #login-error-div > .alert {
-            padding: 2px 10px;
-        }
-
-        .message-div {
-            height: 40px;
-            padding: 5px;
-            display:flex;
-        }
-
-        .message-div > input { flex: 10; }
-        .message-div > button { flex: 1; }
-
-        .chat-box {
-            overflow-y: auto;
-            flex:5;
-            border-radius: 10px;
-            border: 2px solid #5c5c5c;
-            margin: 5px;
-            padding: 5px;
-            background-color: #ddd;
-        }
-
-        .alive-users-box {
-            overflow-y: auto;
-            flex:1;
-            border-radius: 10px;
-            border: 2px solid #5c5c5c;
-            background-color: #ddd;
-            margin: 5px;
-            padding: 5px;
-        }
-
-        .chat-box > h2,
-        .alive-users-box > h2 {
-            margin: 5px 10px;
-            border-bottom: 5px solid #5c5c5c;
-        }
-
-        #main-box {
-            margin-left: 10px;
-            overflow-x: auto;
-        }
-
-        #users-box {
-            margin-left: 10px;
-            overflow-x: auto;
-        }
-
-        .mr-2 {
-            margin-right: 0.2em;
-        }
-
-        i.fa {
-            cursor: pointer;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,600" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="viewport">
@@ -133,6 +61,24 @@
 src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
+    var h = (function(){
+        var iconTag = '<i class="fa fa-user-o fa-2x text-success mr-2"></i>',
+            _renderNicknames = function( users ){
+                var list = '';
+                users.map(function(elm){
+                    list += '<li>'+iconTag+elm+'</li>';
+                });
+                return '<ul class="list-unstyled">'+list+'</ul>';
+            },
+            _nickNameUsed = function(){
+                return '<div class="alert alert-danger" role="alert">Nickname is already in use</div>'
+            };
+        return {
+            renderNicknames: _renderNicknames,
+            nickNameUsed:  _nickNameUsed
+        }
+    })();
+
     $(function(){
         var socket = io.connect(),
             $loginDiv = $('#login-div'),
@@ -158,13 +104,9 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
             socket.emit('new_user',{nickName:$newUserName.val()},function(res){
                 if (res.isValid) {
                     $('#new-user-modal').modal('toggle');
-                    $usersList.html('<ul>');
-                    $.map(res.users, function(i,l){
-                        $usersList.append('<li>'+i+'</li>');
-                    });
-                    $usersList.append('<ul>');
+                    $usersList.html( h.renderNicknames(res.users) );
                 } else {
-                    $errorsDiv.append('<div class="alert alert-danger" role="alert">Nickname is already in use</div>');
+                    $errorsDiv.append( h.nickNameUsed() );
                 }
             });
         });
@@ -174,8 +116,7 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
             if (String($box.val()).trim().length == 0) {
                 return;
             }
-            console.log('mensaje emitido:',$box.val());
-            socket.emit('send_message',{msg:$box.val(), user:$user.val()});
+            socket.emit('send_message',{msg:$box.val(), user:$newUserName.val()});
             $box.val('');
         });
 
@@ -184,19 +125,9 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
         });
 
         socket.on('nicknames', function(data){
-            var names = data.join('</li><li>');
-
-            $usersList.html('<ul><li>'+names+'</li></ul>');
+            $usersList.html( h.renderNicknames(data) );
         });
-
-        socket.on('new_user',function(data){
-            $usersList.html('<ul>');
-            $.map(res.users, function(i,l){
-                $usersList.append('<li>'+i+'</li>');
-            });
-            $usersList.append('<ul>');
-        });
-    })
+    });
 </script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </body>
