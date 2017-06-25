@@ -6,6 +6,12 @@ html, body, .viewport {
     font-family: 'Josefin Sans', sans-serif;
 }
 
+.bot-speak {
+    font-family: 'Press Start 2P';
+    font-size: 0.6em;
+    color: chocolate;
+}
+
 .viewport {
     display: flex;
     flex-direction:column;
@@ -73,4 +79,9 @@ html, body, .viewport {
 
 i.fa {
     cursor: pointer;
+}
+
+img.logo {
+    width: 40px;
+    margin-right: 10px;
 }

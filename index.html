@@ -4,14 +4,14 @@
     <title> My Chat </title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,600" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,600|Press+Start+2P" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
     <div class="viewport">
         <div class="horizontal-box">
             <div class="chat-box">
-                <h2>#myChatChannel</h2>
+                <h2><span><img class="logo" src="/static/img/logo.png"></span>#myChatChannel</h2>
                 <div id="main-box"></div>
             </div>
             <div class="alive-users-box">
@@ -21,7 +21,15 @@
         </div>
         <form id="message-form">
             <div class="message-div">
-                <i class="fa fa-smile-o fa-2x mr-2"></i><input type="text" name="msg" id="msg" placeholder="Message"> </div>
+                <div class="dropup">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="emoDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-smile-o fa-2x" id="emoticons"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="emoDropDown">
+                        <li><img src="/static/img/emo.png"></li>
+                    </ul>
+                </div>
+                <input type="text" name="msg" id="msg" placeholder="Message"> </div>
             </div>
         </form>
     </div> <!-- ./viewport -->
@@ -62,20 +70,39 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
 <script src="/socket.io/socket.io.js"></script>
 <script>
     var h = (function(){
-        var iconTag = '<i class="fa fa-user-o fa-2x text-success mr-2"></i>',
-            _renderNicknames = function( users ){
-                var list = '';
-                users.map(function(elm){
-                    list += '<li>'+iconTag+elm+'</li>';
+        var init = function(){
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+        }, 
+        __isWindowBlur = function(){
+            return !document.hasFocus();
+        },
+        _renderNicknames = function( users ){
+            var list = '';
+            users.map(function(elm){
+                list += '<li><i class="fa fa-'+elm.icon+' fa-2x text-success mr-2"></i>'+elm.name+'</li>';
+            });
+            return '<ul class="list-unstyled">'+list+'</ul>';
+        },
+        _nickNameUsed = function(){
+            return '<div class="alert alert-danger" role="alert">Nickname is already in use</div>'
+        },
+        _launchNotification = function(options){
+            if (Notification.permission == "granted" && __isWindowBlur()) {
+                var notification = new Notification(options.title, {
+                    icon: '/static/img/notification.png',
+                    body: options.msg
                 });
-                return '<ul class="list-unstyled">'+list+'</ul>';
-            },
-            _nickNameUsed = function(){
-                return '<div class="alert alert-danger" role="alert">Nickname is already in use</div>'
-            };
+            }
+        };
+
+        init();
+
         return {
             renderNicknames: _renderNicknames,
-            nickNameUsed:  _nickNameUsed
+            nickNameUsed:  _nickNameUsed,
+            notification: _launchNotification
         }
     })();
 
@@ -93,6 +120,12 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
             $chat = $('#main-box');
 
         $('#new-user-modal').modal();
+
+        $('div.dropup').find('ul').on('click', function(e){
+            console.log(e);
+            console.log($('ul.dropdown-menu'));
+            socket.emit('notify_users',{msg:"Hey there! You've been notified!", title:"You have been mentioned!"});
+        });
 
         $loginForm.find('button').on('click', function(){
             $loginForm.submit();
@@ -121,11 +154,16 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
         });
 
         socket.on('send_message',function(data){
-            $chat.append('<b>'+data.user+':</b> '+data.msg+'<br />');
+            $chat.append('<i class="fa fa-'+data.icon+' mr-2"></i><b>'+data.user+':</b> '+data.msg+'<br />');
         });
 
         socket.on('nicknames', function(data){
             $usersList.html( h.renderNicknames(data) );
+        });
+
+        socket.on('notify_users', function(data){
+            console.log('notify users socket on event');
+            h.notification(data);
         });
     });
 </script>
