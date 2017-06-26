@@ -1,4 +1,5 @@
 <!doctype html>
+<!doctype html>
 <html>
 <head>
     <title> My Chat </title>
@@ -119,11 +120,15 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
             $newUserName = $('#new-nick-name'),
             $chat = $('#main-box');
 
-        $('#new-user-modal').modal();
+        $('#new-user-modal').modal({backdrop:'static', keyboard:false});
 
         $('div.dropup').find('ul').on('click', function(e){
-            console.log(e);
-            console.log($('ul.dropdown-menu'));
+            var imageSize = 55,
+                parentOffset = $(this).parent().offset(), 
+                relX = e.pageX - parentOffset.left,
+                relY = $(this).innerHeight() + (e.pageY - parentOffset.top);
+            
+            socket.emit('emoticon',{user:$newUserName.val(), position:{x:Math.floor( relX / imageSize), y:Math.floor( relY / imageSize)}});
             socket.emit('notify_users',{msg:"Hey there! You've been notified!", title:"You have been mentioned!"});
         });
 
@@ -134,6 +139,8 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
         $loginForm.on('submit', function(e){
             e.preventDefault();
             $errorsDiv.html('');
+            var rex = /(<([^>]+)>)/ig;
+            $newUserName.val($newUserName.val().replace(rex, ""));
             socket.emit('new_user',{nickName:$newUserName.val()},function(res){
                 if (res.isValid) {
                     $('#new-user-modal').modal('toggle');
@@ -162,8 +169,12 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
         });
 
         socket.on('notify_users', function(data){
-            console.log('notify users socket on event');
             h.notification(data);
+        });
+
+        socket.on('emoticon', function(data){
+            var emoId = 'emo'+data.position.x+''+data.position.y;
+            $chat.append('<i class="fa fa-'+data.icon+' mr-2"></i><b>'+data.user+':</b> <div class="emo '+emoId+'"></div></br>');
         });
     });
 </script>

@@ -8,10 +8,10 @@ var PORT = '8080',
     simpleList = [],
     iconsList = [];
 
-app.use('/static',express.static('public'));
+app.use('/static',express.static('app'));
 
 app.get('/', function(req, res){
-    res.sendFile(__dirname+'/index.html');
+    res.sendFile(__dirname+'/app/index.html');
 });
 
 var cookies = [
@@ -57,6 +57,29 @@ io.sockets.on('connection',function(socket){
             if (data.msg == '#cookie') {
                 io.sockets.emit('send_message',{msg:"Today's cookie: <b><i>"+cookies[Math.floor((Math.random() * cookies.length))]+'</i></b>', user:'#b0t', icon:'microchip'});
                 return;
+            } else if (data.msg == '#timeleft') {
+                var current = new Date();
+                var soLunch = new Date(current.getFullYear(), current.getMonth(), current.getDate(), 13, 0, 0);
+                var eoLunch = new Date(current.getFullYear(), current.getMonth(), current.getDate(), 14, 0, 0);
+                var sob = new Date(current.getFullYear(), current.getMonth(), current.getDate(), 8, 0, 0);
+                var eob = new Date(current.getFullYear(), current.getMonth(), current.getDate(), 17, 0, 0);
+                var msg = '';
+                if (current < sob) {
+                    msg = "malfunction... get me some coffee... pronto!";
+                } else if (current > sob && current <= soLunch){
+                    soLunch.getMinutes()
+                    msg = 'Faltan '+(current.getMinutes()-soLunch.getMinutes())+' mins para salir a lunch... hang in there!!';
+                } else if (current > soLunch && current <= eoLunch){
+                    msg = 'Comiending... do not disturb';
+                } else if (current > eoLunch && current <= eob){
+                    msg = 'Ya mero te vas... aguanta '+(current.getMinutes()-eob.getMinutes())+' mins mas! ';
+                } else if(current > eob) {
+                    msg = 'Party time !!';
+                } else {
+                    msg = "It's do o'clock";
+                }
+                io.sockets.emit('send_message',{msg:msg, user:'#b0t', icon:'microchip'});
+                return;
             }
         }
         io.sockets.emit('send_message',{msg:data.msg, user:data.user, icon:iconsList[simpleList.indexOf(data.user)]});
@@ -67,5 +90,9 @@ io.sockets.on('connection',function(socket){
         // launc notification
         // with custom icon and msg
         io.sockets.emit('notify_users',data);
+    });
+
+    socket.on('emoticon', function(data){
+        io.sockets.emit('emoticon',{user:data.user, position:data.position, icon:iconsList[simpleList.indexOf(data.user)]});
     });
 });
