@@ -53,7 +53,12 @@ io.sockets.on('connection',function(socket){
     });
 
     socket.on('send_message',function(data){
-        if (data.msg.indexOf('#') == 0) {
+        if (data.msg.indexOf('@') == 0) {
+            var userTo = data.msg.substring(1, data.msg.indexOf(' ')),
+                msg = data.msg.substring(data.msg.indexOf(' ')+1, data.msg.length);
+            io.sockets.emit('notify',{msg:msg, title:, user:data.user, userTo:userTo, icon:iconsList[simpleList.indexOf(data.user)]});
+            return;
+        } else if (data.msg.indexOf('#') == 0) {
             if (data.msg == '#cookie') {
                 io.sockets.emit('send_message',{msg:"Today's cookie: <b><i>"+cookies[Math.floor((Math.random() * cookies.length))]+'</i></b>', user:'#b0t', icon:'microchip'});
                 return;
@@ -79,6 +84,10 @@ io.sockets.on('connection',function(socket){
                     msg = "It's do o'clock";
                 }
                 io.sockets.emit('send_message',{msg:msg, user:'#b0t', icon:'microchip'});
+                return;
+            } else if (data.msg == '#shout') {
+                var msg = data.msg.substring(data.msg.indexOf(' ')+1, data.msg.length);
+                io.sockets.emit('notify',{msg:msg, title:'Hey!!', user:data.user, icon:iconsList[simpleList.indexOf(data.user)]});
                 return;
             }
         }

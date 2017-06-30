@@ -129,7 +129,6 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
                 relY = $(this).innerHeight() + (e.pageY - parentOffset.top);
             
             socket.emit('emoticon',{user:$newUserName.val(), position:{x:Math.floor( relX / imageSize), y:Math.floor( relY / imageSize)}});
-            socket.emit('notify_users',{msg:"Hey there! You've been notified!", title:"You have been mentioned!"});
         });
 
         $loginForm.find('button').on('click', function(){
@@ -168,8 +167,14 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
             $usersList.html( h.renderNicknames(data) );
         });
 
-        socket.on('notify_users', function(data){
-            h.notification(data);
+        socket.on('notify', function(data){
+            var title = '';
+            if (data.user == $newUserName.val()) {
+                title = 'You have been mentioned';
+            } else if(data.user == 'all') {
+                title = 'Shout!!';
+            }
+            h.notification({title: title, data:data.msg});
         });
 
         socket.on('emoticon', function(data){
