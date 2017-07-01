@@ -19,8 +19,6 @@ var h = (function(){
     },
     _launchNotification = function(options){
         if (Notification.permission) {
-            console.log('local user name:', $('#new-nick-name').val());
-            console.log('notification name:', options.userTo);
             if (__isWindowBlur() || options.userTo == $('#new-nick-name').val()) {
                 var notification = new Notification(options.title, {
                     icon: '/static/img/logo.png',
@@ -101,6 +99,10 @@ $(function(){
     */
     socket.on('send_message',function(data){
         $chat.append('<i class="fa fa-'+data.icon+' mr-2"></i><b>'+data.user+':</b> '+data.msg+'<br />');
+    });
+
+    socket.on('send_image', function(data){
+        $chat.append('<i class="fa fa-'+data.icon+' mr-2"></i><b>'+data.user+':</b> <a href="'+data.imgSrc+'" target="_blank"> <img src="'+data.imgSrc+'" style="height:'+data.imgHeight+'; cursor:pointer;" /></a> <br />');
     });
 
     socket.on('nicknames', function(data){

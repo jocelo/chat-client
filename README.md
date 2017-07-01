@@ -2,15 +2,11 @@
 
 A lighweight chat client built with NodeJs
 
-### Current version
-
-Current version and release date:
-
-0.a1.1706 1-Jul-2017
-
 ### Getting started
 
 Just clone the repository, install dependencies, and run it!!
+
+You can paste image links and they will be rendered.
 
 ### Dependencies
 
@@ -39,6 +35,12 @@ Chat client has an automatic both that will listen to any of the following comma
 ### License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details
+
+### Current version
+
+Current version and release date:
+
+a.2.170701 > 1-Jul-2017
 
 ### Built With
 

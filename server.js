@@ -44,22 +44,39 @@ io.sockets.on('connection',function(socket){
             iconCursor++;
             io.sockets.emit('nicknames',nickNames);
 
-            var welcomeStr = '<span class="bot-speak">'+data.nickName+"'s in tha house !!! </span><br>"
-                + "<span class='ml-5'> > Have a cookie: <b><i>"+cookies[Math.floor((Math.random() * cookies.length))]+'</i></b></span>';
-            
+            // welcome user !
+            var welcomeStr = '<span class="bot-speak">'+data.nickName+"'s in tha house !!! </span>";
             io.sockets.emit('send_message',{msg:welcomeStr, user:'#b0t', icon:'microchip'});
+
+            // personal cookie
+            welcomeStr = '<span class="bot-speak">Have a cookie: <b><i>'+cookies[Math.floor((Math.random() * cookies.length))]+'</i></b></span>';
+            socket.emit('send_message',{msg:welcomeStr, user:'#b0t', icon:'microchip'});
             callback({isValid:true, users:nickNames});
         }
     });
 
     socket.on('send_message',function(data){
         data.msg = data.msg.replace(/(<([^>]+)>)/ig, "");
-        console.log('data from send message:',data.msg);
+        
+        /* it's a link */
+        if (/^(ftp|http|https):\/\/[^ "]+$/.test(data.msg)) {
+            /* it's an image */
+            if ( /.jpg|.png|.bmp|.gif/.test(data.msg) ) {
+                var url = data.msg.split('?')[0];
+                // max 200 px
+                io.sockets.emit('send_image',{imgSrc:url, imgHeight:'100px',user:data.user, icon:iconsList[simpleList.indexOf(data.user)]});
+                return;
+                // TODO: link to a fill image view
+            }
+            // default emit
+            io.sockets.emit('send_message',{msg:data.msg, user:data.user, icon:iconsList[simpleList.indexOf(data.user)]});
+
+            return;
+        }
+
         if (data.msg.indexOf('@') == 0) {
             var userTo = data.msg.substring(1, data.msg.indexOf(' ')),
                 msg = data.msg.substring(data.msg.indexOf(' ')+1, data.msg.length);
-            console.log('when searching for:',data.user);
-            console.log('I found this:',simpleList.indexOf(userTo));
             if (simpleList.indexOf(userTo) == -1) {
                 io.sockets.emit('send_message',{msg:"<span class='bot-speak'>it's a trap!! there's no user: <b>"+userTo+'</b><span>', user:'#b0t', icon:'microchip'});
             }
@@ -104,7 +121,7 @@ io.sockets.on('connection',function(socket){
             } else if (/#shout /.test(data.msg)) {
                 var msg = data.msg.substring(data.msg.indexOf(' ')+1, data.msg.length);
                 var note = {msg:msg, title:'Hey, listen!!', user:data.user, icon:iconsList[simpleList.indexOf(data.user)]};
-                console.log(note);
+
                 io.sockets.emit('notify',note);
                 io.sockets.emit('send_message',{msg:'<i>'+msg.toUpperCase()+' !<i>', user:data.user, icon:iconsList[simpleList.indexOf(data.user)]});
                 return;
