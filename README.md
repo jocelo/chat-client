@@ -2,6 +2,12 @@
 
 A lighweight chat client built with NodeJs
 
+### Current version
+
+Current version and release date:
+
+0.a1.1706 1-Jul-2017
+
 ### Getting started
 
 Just clone the repository, install dependencies, and run it!!
@@ -28,7 +34,7 @@ Chat client has an automatic both that will listen to any of the following comma
 
 ### Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Alfredo Alonso** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
 
 ### License
 
