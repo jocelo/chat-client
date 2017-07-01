@@ -39,7 +39,6 @@
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title"> Bienvenid@ </h4>
                 </div>
                 <div class="modal-body">
@@ -90,11 +89,15 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
             return '<div class="alert alert-danger" role="alert">Nickname is already in use</div>'
         },
         _launchNotification = function(options){
-            if (Notification.permission == "granted" && __isWindowBlur()) {
-                var notification = new Notification(options.title, {
-                    icon: '/static/img/notification.png',
-                    body: options.msg
-                });
+            if (Notification.permission) {
+                console.log('local user name:', $('#new-nick-name').val());
+                console.log('notification name:', options.userTo);
+                if (__isWindowBlur() || options.userTo == $('#new-nick-name').val()) {
+                    var notification = new Notification(options.title, {
+                        icon: '/static/img/logo.png',
+                        body: options.msg
+                    });
+                }
             }
         };
 
@@ -138,8 +141,8 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
         $loginForm.on('submit', function(e){
             e.preventDefault();
             $errorsDiv.html('');
-            var rex = /(<([^>]+)>)/ig;
-            $newUserName.val($newUserName.val().replace(rex, ""));
+            $newUserName.val($newUserName.val().replace(/(<([^>]+)>)/ig, ""));
+            $newUserName.val($newUserName.val().replace(/ /g, ""));
             socket.emit('new_user',{nickName:$newUserName.val()},function(res){
                 if (res.isValid) {
                     $('#new-user-modal').modal('toggle');
@@ -155,6 +158,8 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
             if (String($box.val()).trim().length == 0) {
                 return;
             }
+            $box.val($box.val().replace(/(<([^>]+)>)/ig, ""));
+
             socket.emit('send_message',{msg:$box.val(), user:$newUserName.val()});
             $box.val('');
         });
@@ -168,13 +173,7 @@ src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhO
         });
 
         socket.on('notify', function(data){
-            var title = '';
-            if (data.user == $newUserName.val()) {
-                title = 'You have been mentioned';
-            } else if(data.user == 'all') {
-                title = 'Shout!!';
-            }
-            h.notification({title: title, data:data.msg});
+            h.notification({title:data.title, icon: '<i class="fa fa-'+data.icon+' mr-2">', msg:data.msg, userTo:data.userTo||''});
         });
 
         socket.on('emoticon', function(data){

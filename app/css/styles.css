@@ -9,7 +9,7 @@ html, body, .viewport {
 .bot-speak {
     font-family: 'Press Start 2P';
     font-size: 0.6em;
-    color: chocolate;
+    color: darkslateblue;
 }
 
 .viewport {
@@ -66,6 +66,7 @@ html, body, .viewport {
 #main-box {
     margin-left: 10px;
     overflow-x: auto;
+    word-wrap: break-word;
 }
 
 #users-box {
@@ -73,9 +74,8 @@ html, body, .viewport {
     overflow-x: auto;
 }
 
-.mr-2 {
-    margin-right: 0.2em;
-}
+.mr-2 { margin-right: 0.2em; }
+.ml-5 { margin-left: 0.7em; }
 
 i.fa {
     cursor: pointer;
@@ -92,6 +92,12 @@ img.logo {
     background-repeat: no-repeat;
     height: 55px;
     width: 55px;
+}
+
+#emoDropDown {
+    height: 30px;
+    border-radius: 10px 0px 0px 10px;
+    padding: 0px 10px;
 }
 
 .emo00 { background-position: 0px 0px; }

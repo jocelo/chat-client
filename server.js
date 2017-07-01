@@ -45,7 +45,7 @@ io.sockets.on('connection',function(socket){
             io.sockets.emit('nicknames',nickNames);
 
             var welcomeStr = '<span class="bot-speak">'+data.nickName+"'s in tha house !!! </span><br>"
-                + "  > Have a cookie: <b><i>"+cookies[Math.floor((Math.random() * cookies.length))]+'</i></b>';
+                + "<span class='ml-5'> > Have a cookie: <b><i>"+cookies[Math.floor((Math.random() * cookies.length))]+'</i></b></span>';
             
             io.sockets.emit('send_message',{msg:welcomeStr, user:'#b0t', icon:'microchip'});
             callback({isValid:true, users:nickNames});
@@ -53,13 +53,29 @@ io.sockets.on('connection',function(socket){
     });
 
     socket.on('send_message',function(data){
+        data.msg = data.msg.replace(/(<([^>]+)>)/ig, "");
+        console.log('data from send message:',data.msg);
         if (data.msg.indexOf('@') == 0) {
             var userTo = data.msg.substring(1, data.msg.indexOf(' ')),
                 msg = data.msg.substring(data.msg.indexOf(' ')+1, data.msg.length);
-            io.sockets.emit('notify',{msg:msg, title:, user:data.user, userTo:userTo, icon:iconsList[simpleList.indexOf(data.user)]});
+            console.log('when searching for:',data.user);
+            console.log('I found this:',simpleList.indexOf(userTo));
+            if (simpleList.indexOf(userTo) == -1) {
+                io.sockets.emit('send_message',{msg:"<span class='bot-speak'>it's a trap!! there's no user: <b>"+userTo+'</b><span>', user:'#b0t', icon:'microchip'});
+            }
+            io.sockets.emit('notify',{msg:msg, title:'You were mentioned', user:data.user, userTo:userTo, icon:iconsList[simpleList.indexOf(data.user)]});
             return;
         } else if (data.msg.indexOf('#') == 0) {
-            if (data.msg == '#cookie') {
+            if (data.msg == '#help' || data.msg == '#?') {
+                var msg = '<span class="bot-speak"> Here are some commands you can type to speak to me:' +
+                    '<br> <span class="ml-5"></span> > <b>#cookie</b> I will get you a fresh cookie from the jar.' +
+                    '<br> <span class="ml-5"></span> > <b>#timeleft</b> how much time is left until you can go in peace.' +
+                    '<br> <span class="ml-5"></span> > <b>#shout</b> Launch a notification to those who are away.' +
+                    '<br> <span class="ml-5"></span> > <b>@[user-name]</b> Launch a notification to a specific user.' +
+                    '</span>';
+                io.sockets.emit('send_message',{msg:msg, user:'#b0t', icon:'microchip'});
+                return;
+            } else if (data.msg == '#cookie') {
                 io.sockets.emit('send_message',{msg:"Today's cookie: <b><i>"+cookies[Math.floor((Math.random() * cookies.length))]+'</i></b>', user:'#b0t', icon:'microchip'});
                 return;
             } else if (data.msg == '#timeleft') {
@@ -83,11 +99,14 @@ io.sockets.on('connection',function(socket){
                 } else {
                     msg = "It's do o'clock";
                 }
-                io.sockets.emit('send_message',{msg:msg, user:'#b0t', icon:'microchip'});
+                io.sockets.emit('send_message',{msg:'<span class="bot-speak">'+msg+'</span>', user:'#b0t', icon:'microchip'});
                 return;
-            } else if (data.msg == '#shout') {
+            } else if (/#shout /.test(data.msg)) {
                 var msg = data.msg.substring(data.msg.indexOf(' ')+1, data.msg.length);
-                io.sockets.emit('notify',{msg:msg, title:'Hey!!', user:data.user, icon:iconsList[simpleList.indexOf(data.user)]});
+                var note = {msg:msg, title:'Hey, listen!!', user:data.user, icon:iconsList[simpleList.indexOf(data.user)]};
+                console.log(note);
+                io.sockets.emit('notify',note);
+                io.sockets.emit('send_message',{msg:'<i>'+msg.toUpperCase()+' !<i>', user:data.user, icon:iconsList[simpleList.indexOf(data.user)]});
                 return;
             }
         }
