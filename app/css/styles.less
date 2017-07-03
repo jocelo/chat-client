@@ -1,0 +1,122 @@
+@botColor: darkslateblue;
+@chatBgColor: honeydew;
+@emoImgSize: 55px;
+
+html, body, .viewport {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background-color: darkolivegreen;
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+.bot-speak {
+    font-family: 'Press Start 2P';
+    font-size: 0.6em;
+    color: @botColor;
+}
+
+.viewport {
+    display: flex;
+    flex-direction:column;
+}
+.horizontal-box {
+    display:flex;
+    flex-direction:row;
+    justify-content: space-between;
+    flex:1;
+}
+
+#login-error-div > .alert {
+    padding: 2px 10px;
+}
+
+.message-div {
+    height: 40px;
+    padding: 5px;
+    display:flex;
+}
+
+.message-div > input { flex: 10; }
+.message-div > button { flex: 1; }
+.message-div > i.fa { color: white; }
+
+.chat-box {
+    overflow-y: auto;
+    flex:5;
+    border-radius: 10px;
+    border: 2px solid #5c5c5c;
+    margin: 5px;
+    padding: 5px;
+    background-color: @chatBgColor;
+}
+
+.alive-users-box {
+    overflow-y: auto;
+    flex:1;
+    border-radius: 10px;
+    border: 2px solid #5c5c5c;
+    background-color: @chatBgColor;
+    margin: 5px;
+    padding: 5px;
+}
+
+.chat-box > h2,
+.alive-users-box > h2 {
+    margin: 5px 10px;
+    border-bottom: 5px solid #5c5c5c;
+}
+
+#main-box {
+    margin-left: 10px;
+    overflow-x: auto;
+    word-wrap: break-word;
+}
+
+#users-box {
+    margin-left: 10px;
+    overflow-x: auto;
+}
+
+.mr-2 { margin-right: 0.2em; }
+.ml-5 { margin-left: 0.7em; }
+
+i.fa {
+    cursor: pointer;
+}
+
+img.logo {
+    width: 40px;
+    margin-right: 10px;
+}
+
+.emo {
+    display: inline-block;
+    background-image: url('/static/img/emo.png');
+    background-repeat: no-repeat;
+    height: 55px;
+    width: 55px;
+}
+
+#emoDropDown {
+    height: 30px;
+    border-radius: 10px 0px 0px 10px;
+    padding: 0px 10px;
+}
+
+/*
+    Generate sprite positions
+*/
+
+.generateEmoticosClass(@id, @i:0) when (@i =< @id) {
+    .generateEmoticosClass2(@idd, @j:0) when (@j =< @idd) {
+        .emo@{j}@{i} {
+            background-position: @j*@emoImgSize*-1 @i*@emoImgSize*-1;
+        }
+        .generateEmoticosClass2(@idd, @j+1);
+    }
+    .generateEmoticosClass2(9);
+    .generateEmoticosClass(@id, @i+1);
+}
+
+.generateEmoticosClass(3);
